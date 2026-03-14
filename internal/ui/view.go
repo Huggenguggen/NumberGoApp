@@ -1,6 +1,9 @@
 package ui
 
-import "fmt"
+import (
+	"fmt"
+	"numbergoapp/internal/game"
+)
 
 func progressBar(progress float64) string {
 	width := 30
@@ -19,25 +22,20 @@ func progressBar(progress float64) string {
 	return bar
 }
 
-func upgradeText(m Model, key string) string {
-	up := m.Game.Upgrades[key]
+func upgradeState(m Model, up *game.Upgrade) string {
 	cost := up.Cost()
-
-	label := ""
 
 	switch {
 
 	case m.Game.Levels.Level < up.RequiredLevel:
-		label = lockedStyle.Render("LOCKED")
+		return lockedStyle.Render("LOCKED")
 
 	case m.Game.Money < cost:
-		label = expensiveStyle.Render("Too Expensive")
+		return expensiveStyle.Render("Too Expensive")
 
 	default:
-		label = affordableStyle.Render("Available")
+		return affordableStyle.Render("Available")
 	}
-
-	return label
 }
 
 func (m Model) View() string {
@@ -48,14 +46,25 @@ func (m Model) View() string {
 
 	bar := progressBar(progress)
 
-	userUp := g.Upgrades["user"]
-	trafficUp := g.Upgrades["traffic"]
+	upgradeText := ""
 
-	userCost := userUp.Cost()
-	trafficCost := trafficUp.Cost()
+	for i, key := range game.UpgradeList {
 
-	userState := upgradeText(m, "user")
-	trafficState := upgradeText(m, "traffic")
+		up := m.Game.Upgrades[key]
+
+		state := upgradeState(m, up)
+
+		line := fmt.Sprintf(
+			"[%d] %-18s $%.0f - %d  %s\n",
+			i+1,
+			up.Name,
+			up.Cost(),
+			up.Purchased,
+			state,
+		)
+
+		upgradeText += line
+	}
 
 	return fmt.Sprintf(
 		`
@@ -73,8 +82,7 @@ Level: %d
 Next milestone: $%.0f
 
 Upgrades
-[1] %s		$%.0f - %d 	%s
-[2] %s		$%.0f - %d 	%s
+%s
 
 Status: %s
 
@@ -87,14 +95,7 @@ Press q to quit
 		g.Levels.Level,
 		bar,
 		next,
-		userUp.Name,
-		userCost,
-		userUp.Purchased,
-		userState,
-		trafficUp.Name,
-		trafficCost,
-		trafficUp.Purchased,
-		trafficState,
+		upgradeText,
 		m.StatusMessage,
 	)
 }

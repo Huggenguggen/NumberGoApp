@@ -4,6 +4,8 @@
 package ui
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 
 	"numbergoapp/internal/engine"
@@ -51,14 +53,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.(tea.KeyMsg).String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		}
+		for i, key := range game.UpgradeList {
 
-		case "1":
-			m.StatusMessage = m.Game.BuyUpgrade("user")
-			return m, nil
+			if msg.(tea.KeyMsg).String() == fmt.Sprintf("%d", i+1) {
 
-		case "2":
-			m.StatusMessage = m.Game.BuyUpgrade("traffic")
-			return m, nil
+				m.StatusMessage = m.Game.BuyUpgrade(key)
+
+				return m, nil
+			}
 		}
 	}
 
