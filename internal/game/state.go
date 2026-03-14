@@ -17,7 +17,8 @@ type GameState struct {
 }
 
 func NewGame() *GameState {
-	return &GameState{
+
+	g := &GameState{
 		Users:             100,
 		TrafficCap:        100,
 		Money:             0,
@@ -25,6 +26,18 @@ func NewGame() *GameState {
 		TrafficGrowthRate: 1,
 		RevenuePerUser:    0.1,
 		Levels:            NewLevelSystem(),
-		Upgrades:          DefaultUpgrades(),
+		Upgrades:          map[string]*Upgrade{},
 	}
+
+	for _, key := range UpgradeList {
+
+		def := UpgradeMap[key]
+
+		copy := *def
+		copy.Purchased = 0
+
+		g.Upgrades[key] = &copy
+	}
+
+	return g
 }

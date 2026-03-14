@@ -10,6 +10,5 @@ type SaveData struct {
 
 	Level int
 
-	UserUpgradePurchased    int
-	TrafficUpgradePurchased int
+	UpgradePurchased map[string]int
 }

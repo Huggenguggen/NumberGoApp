@@ -3,19 +3,22 @@ package save
 import "numbergoapp/internal/game"
 
 func FromGame(g *game.GameState) SaveData {
-	return SaveData{
-		Users:      g.Users,
-		TrafficCap: g.TrafficCap,
-		Money:      g.Money,
 
+	data := SaveData{
+		Users:             g.Users,
+		TrafficCap:        g.TrafficCap,
+		Money:             g.Money,
 		UserGrowthRate:    g.UserGrowthRate,
 		TrafficGrowthRate: g.TrafficGrowthRate,
-
-		Level: g.Levels.Level,
-
-		UserUpgradePurchased:    g.Upgrades["user"].Purchased,
-		TrafficUpgradePurchased: g.Upgrades["traffic"].Purchased,
+		Level:             g.Levels.Level,
+		UpgradePurchased:  map[string]int{},
 	}
+
+	for k, up := range g.Upgrades {
+		data.UpgradePurchased[k] = up.Purchased
+	}
+
+	return data
 }
 
 func ToGame(data SaveData) *game.GameState {
@@ -30,8 +33,12 @@ func ToGame(data SaveData) *game.GameState {
 
 	g.Levels.Level = data.Level
 
-	g.Upgrades["user"].Purchased = data.UserUpgradePurchased
-	g.Upgrades["traffic"].Purchased = data.TrafficUpgradePurchased
+	for k, v := range data.UpgradePurchased {
+
+		if up, ok := g.Upgrades[k]; ok {
+			up.Purchased = v
+		}
+	}
 
 	return g
 }
